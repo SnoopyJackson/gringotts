@@ -292,8 +292,8 @@ function updateEntry(catId, entryId, field, value) {
   if (entry) {
     entry[field] = value;
     saveAll(data);
-    // Don't re-render on every keystroke for label changes (keep focus)
-    if (field !== "label") render();
+    // Don't re-render on every keystroke (keeps focus / mobile keyboard open)
+    if (field !== "label" && field !== "amount") render();
   }
 }
 
@@ -484,7 +484,7 @@ function renderPortfolio() {
         nameInput.value = entry.label;
         nameInput.placeholder = "Nom";
         nameInput.oninput = (e) => updateEntry(cat.id, entry.id, "label", e.target.value);
-        nameInput.onchange = () => render();
+        nameInput.onblur = () => render();
 
         const amtInput = document.createElement("input");
         amtInput.className = "entry-input amount";
@@ -492,6 +492,7 @@ function renderPortfolio() {
         amtInput.value = entry.amount;
         amtInput.placeholder = "Montant";
         amtInput.oninput = (e) => updateEntry(cat.id, entry.id, "amount", e.target.value);
+        amtInput.onblur = () => render();
 
         const dateInput = document.createElement("input");
         dateInput.className = "entry-input date";
