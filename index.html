@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gringotts</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-subtitle">Patrimoine</div>
+        <div class="header-title">Gringotts</div>
+      </div>
+      <div class="header-right">
+        <div class="header-total-label">Total</div>
+        <div id="header-total-value" class="header-total-value"></div>
+        <div id="header-diff" class="header-diff" style="display:none"></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="portfolio">Portefeuille</button>
+      <button class="tab-btn" data-tab="stats">Statistiques &amp; Tendances</button>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ── Modal ── -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="modal-content" class="modal">
+      <div class="modal-title">Nouvelle catégorie</div>
+      <div class="modal-subtitle">Couleur assignée automatiquement</div>
+      <div class="modal-name-row">
+        <div id="modal-color-dot" class="modal-color-dot"></div>
+        <input id="modal-name" class="modal-name-input" placeholder="Ex: PEA, Immobilier, Retraite…" />
+      </div>
+      <div class="icon-section">
+        <div class="icon-label">Icône</div>
+        <div id="icon-grid" class="icon-grid"></div>
+      </div>
+      <div class="modal-buttons">
+        <button id="btn-modal-cancel" class="btn-cancel">Annuler</button>
+        <button id="btn-modal-create" class="btn-create">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab content ── -->
+  <div id="tab-portfolio" class="content"></div>
+  <div id="tab-stats" class="content"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
