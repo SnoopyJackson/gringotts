@@ -46,12 +46,18 @@ const fmt = (n) =>
 const fmtDiff = (n) => (n >= 0 ? "+" : "") + fmt(n);
 const pct = (part, total) => (total === 0 ? 0 : ((part / total) * 100).toFixed(1));
 
+const DEFAULT_BUDGET = { salary: 0, expenses: [] };
+
 function loadAll() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (!parsed.budget) parsed.budget = { ...DEFAULT_BUDGET };
+      return parsed;
+    }
   } catch {}
-  return { categories: DEFAULT_CATS, savings: DEFAULT_SAVINGS, snapshots: DEFAULT_SNAPSHOTS };
+  return { categories: DEFAULT_CATS, savings: DEFAULT_SAVINGS, snapshots: DEFAULT_SNAPSHOTS, budget: { ...DEFAULT_BUDGET } };
 }
 
 function saveAll(data) {
@@ -711,11 +717,175 @@ function renderStats() {
   container.appendChild(bottomDiv);
 }
 
+// ── Budget Actions ────────────────────────────────────────────────────────────
+let budgetExpenseNextId = 1000;
+
+function updateSalary(value) {
+  if (!data.budget) data.budget = { salary: 0, expenses: [] };
+  data.budget.salary = Number(value) || 0;
+  saveAll(data);
+  renderBudgetSummary();
+}
+
+function addBudgetExpense() {
+  if (!data.budget) data.budget = { salary: 0, expenses: [] };
+  data.budget.expenses.push({ id: budgetExpenseNextId++, label: "", amount: 0 });
+  saveAll(data);
+  renderBudget();
+}
+
+function updateBudgetExpense(id, field, value) {
+  const exp = (data.budget.expenses || []).find((e) => e.id === id);
+  if (exp) {
+    exp[field] = field === "amount" ? (Number(value) || 0) : value;
+    saveAll(data);
+    if (field === "amount") renderBudgetSummary();
+  }
+}
+
+function deleteBudgetExpense(id) {
+  data.budget.expenses = (data.budget.expenses || []).filter((e) => e.id !== id);
+  saveAll(data);
+  renderBudget();
+}
+
+let _budgetSummaryEl = null;
+
+function renderBudgetSummary() {
+  if (!_budgetSummaryEl) return;
+  const salary = Number(data.budget.salary) || 0;
+  const totalExpenses = (data.budget.expenses || []).reduce((s, e) => s + Number(e.amount || 0), 0);
+  const remaining = salary - totalExpenses;
+  const pctUsed = salary > 0 ? Math.min(100, (totalExpenses / salary) * 100) : 0;
+  const remainColor = remaining < 0 ? "#C87E7E" : remaining < salary * 0.2 ? "#C8C07E" : "#A8C87E";
+  const barColor = remaining < 0 ? "#C87E7E" : remaining < salary * 0.2 ? "#C8C07E" : "#A8C87E";
+
+  _budgetSummaryEl.innerHTML = `
+    <div class="budget-summary-grid">
+      <div class="budget-summary-item">
+        <div class="budget-summary-label">Salaire net</div>
+        <div class="budget-summary-value">${fmt(salary)}</div>
+      </div>
+      <div class="budget-summary-item">
+        <div class="budget-summary-label">Charges fixes</div>
+        <div class="budget-summary-value" style="color:#C87E9A">${fmt(totalExpenses)}</div>
+      </div>
+      <div class="budget-summary-item">
+        <div class="budget-summary-label">Reste à vivre</div>
+        <div class="budget-summary-value" style="color:${remainColor}">${fmt(remaining)}</div>
+      </div>
+    </div>
+    <div class="budget-bar-track">
+      <div class="budget-bar-fill" style="width:${pctUsed}%;background:${barColor}"></div>
+    </div>
+    <div class="budget-bar-labels">
+      <span style="opacity:0.35;font-size:10px;letter-spacing:0.1em">0</span>
+      <span style="opacity:0.35;font-size:10px;letter-spacing:0.1em;font-family:'DM Mono',monospace">${pctUsed.toFixed(0)}% utilisé</span>
+      <span style="opacity:0.35;font-size:10px;letter-spacing:0.1em">${fmt(salary)}</span>
+    </div>`;
+}
+
+// ── Render: Budget Tab ────────────────────────────────────────────────────────
+function renderBudget() {
+  const container = document.getElementById("tab-budget");
+  container.innerHTML = "";
+  container.style.display = currentTab === "budget" ? "" : "none";
+  if (currentTab !== "budget") return;
+
+  if (!data.budget) data.budget = { salary: 0, expenses: [] };
+  const { salary, expenses } = data.budget;
+
+  // Salary section
+  const salaryCard = document.createElement("div");
+  salaryCard.className = "budget-card";
+  salaryCard.innerHTML = `
+    <div class="budget-card-title">💼 Salaire mensuel net</div>
+    <div class="budget-salary-row">
+      <input id="budget-salary-input" class="budget-salary-input" type="number"
+        placeholder="Ex: 2500" value="${salary || ""}" />
+      <span class="budget-currency">€ / mois</span>
+    </div>`;
+  container.appendChild(salaryCard);
+  document.getElementById("budget-salary-input").oninput = (e) => updateSalary(e.target.value);
+
+  // Summary card
+  const summaryCard = document.createElement("div");
+  summaryCard.className = "budget-card budget-summary-card";
+  _budgetSummaryEl = summaryCard;
+  renderBudgetSummary();
+  container.appendChild(summaryCard);
+
+  // Expenses section
+  const expCard = document.createElement("div");
+  expCard.className = "budget-card";
+
+  const expHeader = document.createElement("div");
+  expHeader.className = "budget-expenses-header";
+  expHeader.innerHTML = `<div class="budget-card-title">📋 Charges récurrentes</div>`;
+  expCard.appendChild(expHeader);
+
+  if (expenses.length > 0) {
+    const colHeaders = document.createElement("div");
+    colHeaders.className = "budget-col-headers";
+    colHeaders.innerHTML = `
+      <span class="budget-col-name">Désignation</span>
+      <span class="budget-col-amount">Montant (€)</span>
+      <span class="budget-col-del"></span>`;
+    expCard.appendChild(colHeaders);
+
+    expenses.forEach((exp) => {
+      const row = document.createElement("div");
+      row.className = "budget-expense-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.className = "budget-expense-input budget-exp-name";
+      nameInput.value = exp.label;
+      nameInput.placeholder = "Ex: Loyer, EDF, Abonnement…";
+      nameInput.oninput = (e) => updateBudgetExpense(exp.id, "label", e.target.value);
+      nameInput.onblur = () => { saveAll(data); };
+
+      const amtInput = document.createElement("input");
+      amtInput.className = "budget-expense-input budget-exp-amount";
+      amtInput.type = "number";
+      amtInput.value = exp.amount || "";
+      amtInput.placeholder = "0";
+      amtInput.oninput = (e) => updateBudgetExpense(exp.id, "amount", e.target.value);
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "budget-exp-delete";
+      delBtn.textContent = "×";
+      delBtn.onclick = () => deleteBudgetExpense(exp.id);
+
+      row.append(nameInput, amtInput, delBtn);
+      expCard.appendChild(row);
+    });
+  } else {
+    const empty = document.createElement("div");
+    empty.className = "budget-empty";
+    empty.textContent = "Aucune charge ajoutée";
+    expCard.appendChild(empty);
+  }
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "budget-add-btn";
+  addBtn.textContent = "+ Ajouter une charge";
+  addBtn.onclick = addBudgetExpense;
+  expCard.appendChild(addBtn);
+
+  container.appendChild(expCard);
+
+  const note = document.createElement("div");
+  note.className = "local-note";
+  note.textContent = "Données enregistrées localement dans votre navigateur";
+  container.appendChild(note);
+}
+
 // ── Main render ───────────────────────────────────────────────────────────────
 function render() {
   renderHeader();
   renderPortfolio();
   renderStats();
+  renderBudget();
   updateModalColorDot();
 }
 

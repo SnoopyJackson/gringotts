@@ -626,3 +626,164 @@ body {
   justify-content: center;
   padding-bottom: 20px;
 }
+
+/* ── Budget Tab ── */
+.budget-card {
+  background: #0d0d0d;
+  border: 1px solid #181818;
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-top: 22px;
+}
+.budget-card-title {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.budget-salary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.budget-salary-input {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #f5f0e8;
+  padding: 10px 16px;
+  font-size: 22px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  width: 200px;
+}
+.budget-currency {
+  font-size: 13px;
+  opacity: 0.35;
+  letter-spacing: 0.1em;
+}
+
+/* summary card */
+.budget-summary-card {
+  border-color: #202020;
+}
+.budget-summary-grid {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+}
+.budget-summary-item {
+  flex: 1;
+  padding: 0 16px;
+  border-left: 1px solid #1e1e1e;
+}
+.budget-summary-item:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+.budget-summary-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  opacity: 0.3;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.budget-summary-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+}
+.budget-bar-track {
+  height: 4px;
+  background: #181818;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.budget-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease, background 0.3s;
+}
+.budget-bar-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* expenses list */
+.budget-expenses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.budget-col-headers {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+.budget-col-headers span {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  opacity: 0.28;
+  text-transform: uppercase;
+}
+.budget-col-name { flex: 2; }
+.budget-col-amount { flex: 1; }
+.budget-col-del { width: 28px; }
+
+.budget-expense-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.budget-expense-input {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  color: #f5f0e8;
+  padding: 7px 11px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.budget-exp-name { flex: 2; }
+.budget-exp-amount { flex: 1; font-family: 'DM Mono', monospace; }
+.budget-exp-delete {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.budget-empty {
+  font-size: 12px;
+  opacity: 0.2;
+  text-align: center;
+  padding: 16px 0;
+  letter-spacing: 0.1em;
+}
+.budget-add-btn {
+  margin-top: 10px;
+  width: 100%;
+  background: none;
+  border: 1px dashed #2a2a2a;
+  border-radius: 8px;
+  color: #666;
+  padding: 9px;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 0.12em;
+  font-family: inherit;
+  text-transform: uppercase;
+  transition: border-color 0.2s, color 0.2s;
+}
+.budget-add-btn:hover {
+  border-color: #444;
+  color: #aaa;
+}
+
